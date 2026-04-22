@@ -30,7 +30,7 @@ void main()
     vec3 norm = normalize(normal);
     vec3 lightDirection = normalize(light.position - fragmentPosition);
     float diff = max(dot(norm, lightDirection), 0.0);
-    vec3 diffuse = light.diffuse * (diff * material.diffuse);
+    vec3 diffuse = light.diffuse * (diff * material.diffuse);k
     
     vec3 viewDirection = normalize(viewPosition - fragmentPosition);
     vec3 reflectDirection = reflect(-lightDirection, norm);  

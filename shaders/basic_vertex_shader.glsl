@@ -8,11 +8,12 @@ out vec3 normal;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat3 normalMatrix;
 
 void main()
 {
     fragmentPosition = vec3(model * vec4(vertexposition, 1.0));
-    normalMatrix = mat3(transpose(inverse(model))) * vertexNormal;  
+    normal = normalMatrix * vertexNormal;  
     
     gl_Position = projection * view * vec4(fragmentPosition, 1.0);
 }
