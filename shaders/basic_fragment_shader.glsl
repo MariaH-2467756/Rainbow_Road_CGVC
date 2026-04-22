@@ -10,7 +10,6 @@ struct Material {
 
 struct LightPoint {
     vec3 position;
-
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -21,7 +20,7 @@ in vec3 normal;
   
 uniform vec3 viewPosition;
 uniform Material material;
-uniform Light light;
+uniform LightPoint light;
 
 void main()
 {
@@ -30,7 +29,7 @@ void main()
     vec3 norm = normalize(normal);
     vec3 lightDirection = normalize(light.position - fragmentPosition);
     float diff = max(dot(norm, lightDirection), 0.0);
-    vec3 diffuse = light.diffuse * (diff * material.diffuse);k
+    vec3 diffuse = light.diffuse * (diff * material.diffuse);
     
     vec3 viewDirection = normalize(viewPosition - fragmentPosition);
     vec3 reflectDirection = reflect(-lightDirection, norm);  
@@ -39,4 +38,4 @@ void main()
         
     vec3 result = ambient + diffuse + specular;
     fragmentColor = vec4(result, 1.0);
-} 
+}
