@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Mesh.h"
+#include "ObjLoader.h"
 
 const unsigned int WINDOW_WIDTH = 1900;
 const unsigned int WINDOW_HEIGTH = 1000;
@@ -55,6 +57,10 @@ int main()
 
     TrackRenderer renderer;
     renderer.upload(track);
+
+    // Mesh test.
+    MeshData grandStarData = ObjLoader::load("assets/Grand_Star_Mario(for_light_source).obj");
+    Mesh grandStarMesh = Mesh(grandStarData);
 
     Shader shader("shaders/basic_vertex_shader.glsl", "shaders/basic_fragment_shader.glsl");
 
@@ -107,6 +113,14 @@ int main()
         shader.setVec3Uniform("viewPosition", glm::vec3(0, 5, -8)); // The hardcode camera.
 
         renderer.draw();
+
+        glm::mat4 model = glm::mat4(1.0f); // wuick translations on model for test of loader object.
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 5.0f)); // move
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.01f));  
+        shader.setMat4("model",      model);
+
+        grandStarMesh.draw();
 
         window.swapBuffers();
         window.pollEvents();
