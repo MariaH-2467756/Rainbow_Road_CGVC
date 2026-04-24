@@ -15,9 +15,13 @@ public:
 
     std::vector<TrackVertex> vertices() const { return m_vertices; };
     int vertexCount() const { return m_vertices.size(); };
+    glm::mat4 getTransformAtDistance(float d) const;
+    float totalLength() const { return m_arcLength.back(); }
+
 
 private:
     std::vector<glm::vec3> m_points;
     std::vector<TrackVertex> m_vertices;
+    std::vector<float> m_arcLength;
 
 };

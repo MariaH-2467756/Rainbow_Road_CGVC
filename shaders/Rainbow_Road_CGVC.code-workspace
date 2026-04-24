@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Rainbow_Road_CGVC",
+			"path": ".."
+		},
+		{
+			"name": "includes",
+			"path": "../../../opengl_framework/opengl_base/opengl_base/includes"
+		}
+	],
+	"settings": {}
+}

@@ -17,19 +17,23 @@ struct LightPoint {
 
 in vec3 fragmentPosition;  
 in vec3 normal;  
-  
+in vec2 textureCoordinate; 
+
+uniform sampler2D texture1;
 uniform vec3 viewPosition;
 uniform Material material;
 uniform LightPoint light;
 
 void main()
 {
-    vec3 ambient = light.ambient * material.ambient;
+    vec4 texColor = texture(texture1, textureCoordinate);
+
+    vec3 ambient = light.ambient * material.ambient * texColor.rgb;
   	
     vec3 norm = normalize(normal);
     vec3 lightDirection = normalize(light.position - fragmentPosition);
     float diff = max(dot(norm, lightDirection), 0.0);
-    vec3 diffuse = light.diffuse * (diff * material.diffuse);
+    vec3 diffuse = light.diffuse * (diff * material.diffuse) * texColor.rgb;
     
     vec3 viewDirection = normalize(viewPosition - fragmentPosition);
     vec3 reflectDirection = reflect(-lightDirection, norm);  

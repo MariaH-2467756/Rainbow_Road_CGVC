@@ -15,6 +15,7 @@ struct Vertex {
 struct MeshData {
     std::vector<Vertex>       vertices;
     std::vector<unsigned int> indices;
+    unsigned int texture;
 };
 
 class Mesh {
@@ -36,6 +37,7 @@ private:
 
     size_t m_vertexCount = 0;
     size_t m_indexCount  = 0;
+    unsigned int m_texture;
 
     void setupBuffers(const MeshData& data);
     void release();

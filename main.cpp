@@ -2,6 +2,8 @@
 #include "Window.h"
 #include "/home/Ramen/Documents/School/2BA/SEM2/Computer_Graphics/project/Rainbow_Road_CGVC/track/TrackRenderer.h"
 #include "includes/GLFW/glfw3.h"
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -59,8 +61,15 @@ int main()
     renderer.upload(track);
 
     // Mesh test.
-    MeshData grandStarData = ObjLoader::load("assets/Grand_Star_Mario(for_light_source).obj");
+    MeshData grandStarData = ObjLoader().load("assets/Grand_Star_Mario(for_light_source).obj");
     Mesh grandStarMesh = Mesh(grandStarData);
+
+    MeshData mario = ObjLoader().load("assets/Mario Kart/model_0.obj", "assets/Mario Kart/F2_Item_Kart_Mario_Body_S.png");
+    Mesh marioMesh = Mesh(mario);
+    MeshData kart = ObjLoader().load("assets/Mario Kart/model_1.obj", "assets/Mario Kart/F2_Item_Kart_Mario_Kart_S.png");
+    Mesh kartMesh = Mesh(kart);
+    MeshData wheels = ObjLoader().load("assets/Mario Kart/model_2.obj", "assets/Mario Kart/F2_Item_Kart_Mario_Tire_S.png");
+    Mesh wheelsMesh = Mesh(wheels);
 
     Shader shader("shaders/basic_vertex_shader.glsl", "shaders/basic_fragment_shader.glsl");
 
@@ -84,12 +93,23 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
+    float distanceTravelled = 0.0f;
+    float speed             = 5.0f;
+    float lastTime          = glfwGetTime();
+
     while (!window.shouldClose())
     {
+        float now   = glfwGetTime();
+        float delta = now - lastTime;
+        lastTime    = now;
+
+        distanceTravelled += speed * delta;
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.useProgram();
+        shader.setIntUniform("texture1", 0);
 
         // matrices unifroms
         shader.setMat4("model",      model);
@@ -114,13 +134,15 @@ int main()
 
         renderer.draw();
 
-        glm::mat4 model = glm::mat4(1.0f); // wuick translations on model for test of loader object.
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 5.0f)); // move
-        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.01f));  
-        shader.setMat4("model",      model);
+        glm::mat4 kartModel = track.getTransformAtDistance(distanceTravelled);
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 5.0f)); // move
+        kartModel = glm::rotate(kartModel, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        kartModel = glm::scale(kartModel, glm::vec3(0.8f));  
+        shader.setMat4("model",kartModel);
+        marioMesh.draw();
+        kartMesh.draw();
+        wheelsMesh.draw();
 
-        grandStarMesh.draw();
 
         window.swapBuffers();
         window.pollEvents();

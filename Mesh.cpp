@@ -3,7 +3,7 @@
 
 
 Mesh::Mesh(Mesh&& other) noexcept: m_VAO(std::exchange(other.m_VAO, 0)), m_VBO(std::exchange(other.m_VBO, 0)), m_EBO(std::exchange(other.m_EBO, 0)), 
-m_vertexCount(std::exchange(other.m_vertexCount, 0)), m_indexCount (std::exchange(other.m_indexCount,  0)) {}
+m_vertexCount(std::exchange(other.m_vertexCount, 0)), m_indexCount (std::exchange(other.m_indexCount,  0)), m_texture(other.m_texture) {}
 
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
     if (this != &other) {
@@ -18,6 +18,8 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
 }
 
 void Mesh::draw() const {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_texture);
     glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indexCount), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0); // reset bind.
@@ -26,6 +28,7 @@ void Mesh::draw() const {
 void Mesh::setupBuffers(const MeshData& data) {
     m_vertexCount = data.vertices.size();
     m_indexCount  = data.indices.size();
+    m_texture = data.texture;
 
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
