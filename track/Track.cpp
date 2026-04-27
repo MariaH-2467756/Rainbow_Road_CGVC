@@ -21,6 +21,7 @@ void Track::build(float width) {
     m_vertices.clear();
     m_arcLength.clear();
     m_arcLength.push_back(0.0f);
+    float arcLength = 0.0;
 
     for (int i = 0; i < (int)m_points.size(); i++) {
         glm::vec3 tangent;
@@ -32,9 +33,10 @@ void Track::build(float width) {
         glm::vec3 side   = glm::normalize(glm::cross(tangent, glm::vec3(0,1,0)));
         glm::vec3 normal = glm::normalize(glm::cross(tangent, side)); // points up
 
-        float u = (float)i / (float)(m_points.size() - 1);
-        m_vertices.push_back({ m_points[i] + side * width, normal, { u, 1.f } });
-        m_vertices.push_back({ m_points[i] - side * width, normal, { u, 0.f } });
+        if (i > 0) { arcLength = m_arcLength.back() + glm::length(m_points[i] - m_points[i-1]); }
+
+        m_vertices.push_back({ m_points[i] + side * width, normal, { arcLength, 1.f } });
+        m_vertices.push_back({ m_points[i] - side * width, normal, { arcLength, 0.f } });
 
         if (i > 0) { m_arcLength.push_back(m_arcLength.back() + glm::length(m_points[i] - m_points[i-1])); }
     }

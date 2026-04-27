@@ -1,4 +1,4 @@
-#include "BezierCurve.h"
+#include "TrackCurves.h"
 #include <vector>
 
 struct TrackVertex {

@@ -1,6 +1,6 @@
 #include "Shader.h"
 #include "Window.h"
-#include "/home/Ramen/Documents/School/2BA/SEM2/Computer_Graphics/project/Rainbow_Road_CGVC/track/TrackRenderer.h"
+#include "track/TrackRenderer.h"
 #include "includes/GLFW/glfw3.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
@@ -25,40 +25,13 @@ int main()
 
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGTH);
 
-    // AI genrated example curves. (for testing NOT FINAL)
-    BezierCurve c1 ({ -3,0,0 },  { -1,0,2 },   { 1,0,2 },    { 3,0,0 });
-    BezierCurve c2 ({ 3,0,0 },   { 5,0,-2 },   { 7,0,-2 },   { 9,0,0 });
-    BezierCurve c3 ({ 9,0,0 },   { 11,0,2 },   { 13,0,2 },   { 15,0,0 });
-    BezierCurve c4 ({ 15,0,0 },  { 17,0,-2 },  { 19,0,-2 },  { 21,0,0 });
 
-    BezierCurve c5 ({ 21,0,0 },  { 23,0,3 },   { 23,0,6 },   { 21,0,9 });
-    BezierCurve c6 ({ 21,0,9 },  { 19,0,11 },  { 17,0,11 },  { 15,0,9 });
-    BezierCurve c7 ({ 15,0,9 },  { 13,0,7 },   { 11,0,7 },   { 9,0,9 });
-    BezierCurve c8 ({ 9,0,9 },   { 7,0,11 },   { 5,0,11 },   { 3,0,9 });
 
-    BezierCurve c9 ({ 3,0,9 },   { 1,0,7 },    { -1,0,7 },   { -3,0,9 });
-    BezierCurve c10({ -3,0,9 },  { -5,0,11 },  { -7,0,11 },  { -9,0,9 });
-    BezierCurve c11({ -9,0,9 },  { -11,0,7 },  { -13,0,7 },  { -15,0,9 });
-    BezierCurve c12({ -15,0,9 }, { -17,0,11 }, { -19,0,11 }, { -21,0,9 });
-
-    BezierCurve c13({ -21,0,9 }, { -23,0,6 },  { -23,0,3 },  { -21,0,0 });
-    BezierCurve c14({ -21,0,0 }, { -19,0,-2 }, { -17,0,-2 }, { -15,0,0 });
-    BezierCurve c15({ -15,0,0 }, { -13,0,2 },  { -11,0,2 },  { -9,0,0 });
-    BezierCurve c16({ -9,0,0 },  { -7,0,-2 },  { -5,0,-2 },  { -3,0,0 });
-
-    BezierCurve c17({ -3,0,0 },  { -1,0,-3 },  { 1,0,-3 },   { 3,0,0 });
-    BezierCurve c18({ 3,0,0 },   { 5,0,3 },    { 7,0,3 },    { 9,0,0 });
-    BezierCurve c19({ 9,0,0 },   { 11,0,-3 },  { 13,0,-3 },  { 15,0,0 });
-    BezierCurve c20({ 15,0,0 },  { 9,0,-1 },   { 3,0,-1 },   { -3,0,0 });
-
-    Track track({
-    c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,
-    c11,c12,c13,c14,c15,c16,c17,c18,c19,c20
-    }); // Test track
-    track.build(0.4f);
+    Track track(getCurves()); // Test track
+    track.build(0.8f);
 
     TrackRenderer renderer;
-    renderer.upload(track);
+    renderer.upload(track, "assets/rainbow_road_texture.png");
 
     // Mesh test.
     MeshData grandStarData = ObjLoader().load("assets/Grand_Star_Mario(for_light_source).obj");
@@ -75,16 +48,22 @@ int main()
 
     // matrices
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view  = glm::lookAt(
-        glm::vec3(0, 5, -8),
-        glm::vec3(0, 0, 0),
-        glm::vec3(0, 1, 0)
-    ); // Hardcoded camera position in view mat.
-    glm::mat4 proj  = glm::perspective(
-        glm::radians(45.0f),
-        (float)WINDOW_WIDTH / WINDOW_HEIGTH,
-        0.1f, 100.0f
-    ); // basic projection matrix.
+    glm::vec3 cameraPos    = glm::vec3(0.0f, 150.0f, -220.0f);
+    glm::vec3 cameraTarget = glm::vec3(10.0f, 2.0f, 0.0f);
+    glm::vec3 cameraUp     = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    glm::mat4 view = glm::lookAt(
+        cameraPos,
+        cameraTarget,
+        cameraUp
+    );
+
+    glm::mat4 proj = glm::perspective(
+        glm::radians(30.0f),
+        static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGTH),
+        0.1f,
+        1000.0f
+    );
     // normalMatrix transforms normals correctly when model is scaled/rotated
     glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(model))); // Calc normal on CPU now.
 
@@ -94,7 +73,7 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     float distanceTravelled = 0.0f;
-    float speed             = 5.0f;
+    float speed             = 25.0f;
     float lastTime          = glfwGetTime();
 
     while (!window.shouldClose())
@@ -124,13 +103,13 @@ int main()
         shader.setVec3Uniform("light.specular", glm::vec3(1.0f));
 
         // material unifroms
-        shader.setVec3Uniform("material.ambient",   glm::vec3(sin(glfwGetTime() *1.0f), sin(glfwGetTime() *0.2f), sin(glfwGetTime() *0.8f)));
-        shader.setVec3Uniform("material.diffuse",   glm::vec3(0.2f, 0.2f, 0.8f));
+        shader.setVec3Uniform("material.ambient",   glm::vec3(1.0f,1.0f, 1.0f));
+        shader.setVec3Uniform("material.diffuse",   glm::vec3(1.0f, 1.0f, 1.f));
         shader.setVec3Uniform("material.specular",  glm::vec3(0.5f));
         shader.setFloatUniform("material.shininess", 32.0f);
 
         // camera position for specular
-        shader.setVec3Uniform("viewPosition", glm::vec3(0, 5, -8)); // The hardcode camera.
+        shader.setVec3Uniform("viewPosition", cameraPos); // The hardcode camera.
 
         renderer.draw();
 

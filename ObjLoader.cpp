@@ -58,10 +58,10 @@ MeshData ObjLoader::load(const std::string& objectFilepath, const char* textureF
     return result;
 }
 
-void ObjLoader::loadTexture(const char* textureFilePath, unsigned int& texture)
+void loadTexture(const char* textureFilePath, unsigned int& texture)
 {
     // Load the texture.
-    if (textureFilePath == ""){
+    if (strlen(textureFilePath) == 0){
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
         unsigned char whitePixel[] = {255, 255, 255, 255};
@@ -77,7 +77,7 @@ void ObjLoader::loadTexture(const char* textureFilePath, unsigned int& texture)
         unsigned char *data = stbi_load(textureFilePath, &width, &height, &nrChannels, 0);
         if (data)
         {
-            GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB; // ← detect format
+            GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
