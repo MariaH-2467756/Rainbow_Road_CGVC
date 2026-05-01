@@ -5,8 +5,8 @@
 
 class ObjLoader {
 public:
-    MeshData load(const std::string& objectFilepath, const char* textureFilePath = "");
-
+  MeshData load(const std::string &objectFilepath,
+                const char *textureFilePath = "");
 };
 
-void loadTexture(const char* textureFilePath, unsigned int& texture);
+void loadTexture(const char *textureFilePath, unsigned int &texture);
