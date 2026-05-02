@@ -6,9 +6,12 @@ class Window {
 public:
   Window(int width, int height, const char *name);
   ~Window();
+  GLFWwindow *getGLFWwindow() const;
   bool shouldClose();
   void swapBuffers();
   void pollEvents();
+  void setupCallbacks(GLFWcursorposfun mouseCallback,
+                      GLFWscrollfun scrollCallback);
 
 private:
   void init();

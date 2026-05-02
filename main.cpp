@@ -1,3 +1,5 @@
+#include "Camera.h"
+#include "ControlsHandler.h"
 #include "Mesh.h"
 #include "ObjLoader.h"
 #include "Shader.h"
@@ -14,6 +16,15 @@ const unsigned int WINDOW_WIDTH = 1900;
 const unsigned int WINDOW_HEIGTH = 1000;
 const char *WINDOW_NAME = "Rainbow Road";
 
+// function prototypes
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+
+// controlshandler init
+ControlsHandler *controls = nullptr;
+
+float delta = 0;
+
 int main() {
   Window window = Window(WINDOW_WIDTH, WINDOW_HEIGTH, WINDOW_NAME);
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -21,7 +32,13 @@ int main() {
     return -1;
   }
 
-  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGTH);
+  // camera init
+  Camera camera(glm::vec3(0.0f, 0.0f, 150.0f));
+  // controlshandler declaration
+  ControlsHandler controlsInstance(camera, window, WINDOW_WIDTH, WINDOW_HEIGTH);
+  controls = &controlsInstance;
+
+  window.setupCallbacks(mouse_callback, scroll_callback);
 
   Track track(getCurves()); // Test track
   track.build(0.8f);
@@ -52,16 +69,6 @@ int main() {
 
   // matrices
   glm::mat4 model = glm::mat4(1.0f);
-  glm::vec3 cameraPos = glm::vec3(0.0f, 150.0f, -220.0f);
-  glm::vec3 cameraTarget = glm::vec3(10.0f, 2.0f, 0.0f);
-  glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-  glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
-
-  glm::mat4 proj = glm::perspective(glm::radians(30.0f),
-                                    static_cast<float>(WINDOW_WIDTH) /
-                                        static_cast<float>(WINDOW_HEIGTH),
-                                    0.1f, 1000.0f);
   // normalMatrix transforms normals correctly when model is scaled/rotated
   glm::mat3 normalMatrix =
       glm::mat3(glm::transpose(glm::inverse(model))); // Calc normal on CPU now.
@@ -76,11 +83,20 @@ int main() {
   float lastTime = glfwGetTime();
 
   while (!window.shouldClose()) {
+    controls->processInput(delta);
+
     float now = glfwGetTime();
-    float delta = now - lastTime;
+    delta = now - lastTime;
     lastTime = now;
 
     distanceTravelled += speed * delta;
+
+    // recalculate view and projection each frame
+    glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 proj = glm::perspective(glm::radians(camera.GetZoom()),
+                                      static_cast<float>(WINDOW_WIDTH) /
+                                          static_cast<float>(WINDOW_HEIGTH),
+                                      0.1f, 1000.0f);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -107,7 +123,6 @@ int main() {
     shader.setFloatUniform("material.shininess", 32.0f);
 
     // camera position for specular
-    shader.setVec3Uniform("viewPosition", cameraPos); // The hardcode camera.
 
     renderer.draw();
 
@@ -124,4 +139,12 @@ int main() {
     window.swapBuffers();
     window.pollEvents();
   }
+}
+
+// mouse controls wrapper functions
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+  controls->mouseCallback(xpos, ypos);
+}
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+  controls->scrollCallback(yoffset);
 }

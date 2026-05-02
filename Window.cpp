@@ -7,11 +7,25 @@ Window::Window(int width, int height, const char *name)
 
 Window::~Window() { close(); }
 
+GLFWwindow *Window::getGLFWwindow() const { return m_window; }
+
 bool Window::shouldClose() { return glfwWindowShouldClose(m_window); }
 
 void Window::swapBuffers() { glfwSwapBuffers(m_window); }
 
 void Window::pollEvents() { glfwPollEvents(); }
+
+void Window::setupCallbacks(GLFWcursorposfun mouseCallback,
+                            GLFWscrollfun scrollCallback) {
+  // correctly resize window
+  glfwSetFramebufferSizeCallback(m_window,
+                                 [](GLFWwindow *w, int width, int height) {
+                                   glViewport(0, 0, width, height);
+                                 });
+  glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(m_window, mouseCallback);
+  glfwSetScrollCallback(m_window, scrollCallback);
+}
 
 void Window::init() {
   if (!glfwInit()) {
