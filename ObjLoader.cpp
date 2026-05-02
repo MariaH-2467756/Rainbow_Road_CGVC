@@ -55,7 +55,8 @@ MeshData ObjLoader::load(const std::string &objectFilepath,
   return result;
 }
 
-void loadTexture(const char *textureFilePath, unsigned int &texture) {
+void loadTexture(const char *textureFilePath, unsigned int &texture,
+                 bool verticalFlip) {
   // Load the texture.
   if (strlen(textureFilePath) == 0) {
     glGenTextures(1, &texture);
@@ -71,10 +72,16 @@ void loadTexture(const char *textureFilePath, unsigned int &texture) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     int width, height, nrChannels;
+    if (verticalFlip) {
+      stbi_set_flip_vertically_on_load(true);
+    }
     unsigned char *data =
         stbi_load(textureFilePath, &width, &height, &nrChannels, 0);
     if (data) {
-      GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+      GLenum format = (nrChannels == 4)
+                          ? GL_RGBA
+                          : GL_RGB; // Don;t use alhpa in shaders yet, but look
+                                    // into updating that.
       glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
                    GL_UNSIGNED_BYTE, data);
       glGenerateMipmap(GL_TEXTURE_2D);

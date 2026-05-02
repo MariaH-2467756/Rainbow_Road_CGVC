@@ -1,7 +1,8 @@
 #include "Camera.h"
 #include "ControlsHandler.h"
-#include "Mesh.h"
-#include "ObjLoader.h"
+#include "LakituWithSign.h"
+#include "LightObject.h"
+#include "MarioInKart.h"
 #include "Shader.h"
 #include "Window.h"
 #include "includes/GLFW/glfw3.h"
@@ -42,54 +43,51 @@ int main() {
 
   Track track(getCurves()); // Test track
   track.build(0.8f);
+  TrackRenderer trackRenderer;
+  trackRenderer.upload(track, "assets/rainbow_road_texture.png");
 
-  TrackRenderer renderer;
-  renderer.upload(track, "assets/rainbow_road_texture.png");
+  Shader shader = Shader("shaders/basic_vertex_shader.glsl",
+                         "shaders/basic_fragment_shader.glsl");
 
-  // Mesh test.
-  MeshData grandStarData =
-      ObjLoader().load("assets/Grand_Star_Mario(for_light_source).obj");
-  Mesh grandStarMesh = Mesh(grandStarData);
+  MarioInKart mario = MarioInKart();
 
-  MeshData mario =
-      ObjLoader().load("assets/Mario Kart/model_0.obj",
-                       "assets/Mario Kart/F2_Item_Kart_Mario_Body_S.png");
-  Mesh marioMesh = Mesh(mario);
-  MeshData kart =
-      ObjLoader().load("assets/Mario Kart/model_1.obj",
-                       "assets/Mario Kart/F2_Item_Kart_Mario_Kart_S.png");
-  Mesh kartMesh = Mesh(kart);
-  MeshData wheels =
-      ObjLoader().load("assets/Mario Kart/model_2.obj",
-                       "assets/Mario Kart/F2_Item_Kart_Mario_Tire_S.png");
-  Mesh wheelsMesh = Mesh(wheels);
+  ChromaObject::initShader();
+  LakituWithSign lakituWithSign = LakituWithSign();
 
-  Shader shader("shaders/basic_vertex_shader.glsl",
-                "shaders/basic_fragment_shader.glsl");
+  LightObject::initShader();
+  LightObject lights[5] = {
+      {glm::vec3(10.0f, 20.0f, 10.0f), glm::vec3(0.15f), glm::vec3(0.8f),
+       glm::vec3(1.0f)},
+      {glm::vec3(-50.0f, 30.0f, 0.0f), glm::vec3(0.15f),
+       glm::vec3(0.6f, 0.0f, 0.6f), glm::vec3(1.0f, 0.0f, 1.0f)},
+      {glm::vec3(0.0f, 50.0f, -100.0f), glm::vec3(0.15f),
+       glm::vec3(1.0f, 0.5f, 0.0f), glm::vec3(1.0f, 0.8f, 0.2f)},
+      {glm::vec3(100.0f, 15.0f, 50.0f), glm::vec3(0.15f),
+       glm::vec3(0.0f, 0.4f, 0.8f), glm::vec3(0.0f, 0.6f, 1.0f)},
+      {glm::vec3(-30.0f, 10.0f, 80.0f), glm::vec3(0.15f), glm::vec3(0.5f),
+       glm::vec3(0.5f)}};
 
   // matrices
   glm::mat4 model = glm::mat4(1.0f);
   // normalMatrix transforms normals correctly when model is scaled/rotated
   glm::mat3 normalMatrix =
-      glm::mat3(glm::transpose(glm::inverse(model))); // Calc normal on CPU now.
+      glm::mat3(glm::transpose(glm::inverse(model))); // Calc normal on CPU.
 
   // light
   glm::vec3 lightPos(2.0f, 4.0f, 2.0f); // Hardcoded light.
 
   glEnable(GL_DEPTH_TEST);
 
+  // vars for moving calcs.
   float distanceTravelled = 0.0f;
-  float speed = 25.0f;
+  float kartSpeed = 2.50f;
+  float lakituSpeed = 0.15f;
   float lastTime = glfwGetTime();
 
   while (!window.shouldClose()) {
-    controls->processInput(delta);
-
     float now = glfwGetTime();
     delta = now - lastTime;
-    lastTime = now;
-
-    distanceTravelled += speed * delta;
+    controls->processInput(delta);
 
     // recalculate view and projection each frame
     glm::mat4 view = camera.GetViewMatrix();
@@ -102,39 +100,42 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shader.useProgram();
-    shader.setIntUniform("texture1", 0);
 
-    // matrices unifroms
+    // matrices uniforms
     shader.setMat4("model", model);
     shader.setMat4("view", view);
     shader.setMat4("projection", proj);
     shader.setMat3("normalMatrix", normalMatrix);
 
-    // light uniforms
-    shader.setVec3Uniform("light.position", lightPos);
-    shader.setVec3Uniform("light.ambient", glm::vec3(1.0f));
-    shader.setVec3Uniform("light.diffuse", glm::vec3(0.8f));
-    shader.setVec3Uniform("light.specular", glm::vec3(1.0f));
+    // set the light uniforms
+    for (int i = 0; i < 5; i++) {
+      lights[i].setLightUniforms(shader, i);
+    }
 
-    // material unifroms
+    // material uniforms
     shader.setVec3Uniform("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
     shader.setVec3Uniform("material.diffuse", glm::vec3(1.0f, 1.0f, 1.f));
     shader.setVec3Uniform("material.specular", glm::vec3(0.5f));
     shader.setFloatUniform("material.shininess", 32.0f);
 
-    // camera position for specular
+    // draw track
+    trackRenderer.draw();
 
-    renderer.draw();
-
+    // draw objects moving allong track.
+    lastTime = now;
+    distanceTravelled += kartSpeed * delta;
     glm::mat4 kartModel = track.getTransformAtDistance(distanceTravelled);
-    // model = glm::translate(model, glm::vec3(0.0f, 0.0f, 5.0f)); // move
-    kartModel = glm::rotate(kartModel, glm::radians(180.0f),
-                            glm::vec3(0.0f, 1.0f, 0.0f));
-    kartModel = glm::scale(kartModel, glm::vec3(0.8f));
-    shader.setMat4("model", kartModel);
-    marioMesh.draw();
-    kartMesh.draw();
-    wheelsMesh.draw();
+    glm::mat3 kartNormalMatrix =
+        glm::mat3(glm::transpose(glm::inverse(kartModel)));
+
+    shader.setMat3("normalMatrix", kartNormalMatrix);
+    mario.draw(shader, kartModel, view, proj);
+    lakituWithSign.draw(shader, kartModel, view, proj, lastTime * lakituSpeed);
+
+    // draw the light objects (AKA grandstars)
+    for (int i = 0; i < 5; i++) { // last, different shder.
+      lights[i].draw(model, view, proj);
+    }
 
     window.swapBuffers();
     window.pollEvents();

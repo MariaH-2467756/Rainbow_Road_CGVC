@@ -6,24 +6,22 @@
 
 // Helper to read the file into a string
 std::string readFile(const std::string &path) {
-  std::ifstream handle(path);
-  handle.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+  try {
+    std::ifstream handle(path);
+    handle.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
-  return std::string(std::istreambuf_iterator<char>(handle),
-                     std::istreambuf_iterator<char>());
+    return std::string(std::istreambuf_iterator<char>(handle),
+                       std::istreambuf_iterator<char>());
+  } catch (const std::exception &e) {
+    std::cout << "ERROR: Failed to read shader file: " << path << "\n"
+              << e.what() << "\n";
+    exit(-1);
+  }
 }
 
 Shader::Shader(const char *vertexShaderPath, const char *fragementShaderPath) {
-  std::string vertexShaderCodeStr;
-  std::string fragmentShaderCodeStr;
-
-  try {
-    vertexShaderCodeStr = readFile(vertexShaderPath);
-    fragmentShaderCodeStr = readFile(fragementShaderPath);
-  } catch (const std::exception &e) {
-    std::cout << "ERROR: Failed to read shader files\n" << e.what() << "\n";
-    return;
-  }
+  std::string vertexShaderCodeStr = readFile(vertexShaderPath);
+  std::string fragmentShaderCodeStr = readFile(fragementShaderPath);
 
   const char *vertexShaderCode = vertexShaderCodeStr.c_str();
   const char *fragmentShaderCode = fragmentShaderCodeStr.c_str();

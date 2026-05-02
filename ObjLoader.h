@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Mesh.h"
+#include <memory>
 #include <string>
 
 class ObjLoader {
@@ -9,4 +10,5 @@ public:
                 const char *textureFilePath = "");
 };
 
-void loadTexture(const char *textureFilePath, unsigned int &texture);
+void loadTexture(const char *textureFilePath, unsigned int &texture,
+                 bool verticalFlip = false);
