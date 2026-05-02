@@ -7,8 +7,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "Mesh.h"
-#include "ObjLoader.h"
+#include "LakituWithSign.h"
+#include "MarioInKart.h"
+#include "LightObject.h"
 
 const unsigned int WINDOW_WIDTH = 1900;
 const unsigned int WINDOW_HEIGTH = 1000;
@@ -29,28 +30,36 @@ int main()
 
     Track track(getCurves()); // Test track
     track.build(0.8f);
+    TrackRenderer trackRenderer;
+    trackRenderer.upload(track, "assets/rainbow_road_texture.png");
 
-    TrackRenderer renderer;
-    renderer.upload(track, "assets/rainbow_road_texture.png");
 
-    // Mesh test.
-    MeshData grandStarData = ObjLoader().load("assets/Grand_Star_Mario(for_light_source).obj");
-    Mesh grandStarMesh = Mesh(grandStarData);
+    Shader shader = Shader( "shaders/basic_vertex_shader.glsl", "shaders/basic_fragment_shader.glsl" );
 
-    MeshData mario = ObjLoader().load("assets/Mario Kart/model_0.obj", "assets/Mario Kart/F2_Item_Kart_Mario_Body_S.png");
-    Mesh marioMesh = Mesh(mario);
-    MeshData kart = ObjLoader().load("assets/Mario Kart/model_1.obj", "assets/Mario Kart/F2_Item_Kart_Mario_Kart_S.png");
-    Mesh kartMesh = Mesh(kart);
-    MeshData wheels = ObjLoader().load("assets/Mario Kart/model_2.obj", "assets/Mario Kart/F2_Item_Kart_Mario_Tire_S.png");
-    Mesh wheelsMesh = Mesh(wheels);
+    MarioInKart mario = MarioInKart();
 
-    Shader shader("shaders/basic_vertex_shader.glsl", "shaders/basic_fragment_shader.glsl");
+    ChromaObject::initShader();
+    LakituWithSign lakituWithSign = LakituWithSign();
+
+    LightObject::initShader();
+    LightObject lights[5] = {
+    {glm::vec3(10.0f, 20.0f, 10.0f),  glm::vec3(0.15f),  glm::vec3(0.8f),           glm::vec3(1.0f)},
+    {glm::vec3(-50.0f, 30.0f, 0.0f),  glm::vec3(0.15f),  glm::vec3(0.6f, 0.0f, 0.6f), glm::vec3(1.0f, 0.0f, 1.0f)},
+    {glm::vec3(0.0f, 50.0f, -100.0f), glm::vec3(0.15f),  glm::vec3(1.0f, 0.5f, 0.0f), glm::vec3(1.0f, 0.8f, 0.2f)},
+    {glm::vec3(100.0f, 15.0f, 50.0f), glm::vec3(0.15f),  glm::vec3(0.0f, 0.4f, 0.8f), glm::vec3(0.0f, 0.6f, 1.0f)},
+    {glm::vec3(-30.0f, 10.0f, 80.0f), glm::vec3(0.15f), glm::vec3(0.5f),           glm::vec3(0.5f)}
+    };
 
     // matrices
     glm::mat4 model = glm::mat4(1.0f);
     glm::vec3 cameraPos    = glm::vec3(0.0f, 150.0f, -220.0f);
     glm::vec3 cameraTarget = glm::vec3(10.0f, 2.0f, 0.0f);
     glm::vec3 cameraUp     = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    // testiing moddel to put something infront of current hardcoded camera
+    glm::vec3 cameraForward = glm::normalize(cameraTarget - cameraPos);
+    glm::vec3 objectPos = cameraPos + cameraForward * 10.0f;
+    glm::mat4 hudModel = glm::translate(glm::mat4(1.0f), objectPos);
 
     glm::mat4 view = glm::lookAt(
         cameraPos,
@@ -65,63 +74,65 @@ int main()
         1000.0f
     );
     // normalMatrix transforms normals correctly when model is scaled/rotated
-    glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(model))); // Calc normal on CPU now.
+    glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(model))); // Calc normal on CPU.
 
     // light
     glm::vec3 lightPos(2.0f, 4.0f, 2.0f); // Hardcoded light.
 
     glEnable(GL_DEPTH_TEST);
 
+    // vars for moving calcs.
     float distanceTravelled = 0.0f;
-    float speed             = 25.0f;
-    float lastTime          = glfwGetTime();
+    float kartSpeed = 25.0f;
+    float lakituSpeed = 1.5f;
+    float lastTime = glfwGetTime();
 
     while (!window.shouldClose())
     {
-        float now   = glfwGetTime();
-        float delta = now - lastTime;
-        lastTime    = now;
-
-        distanceTravelled += speed * delta;
-
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.useProgram();
-        shader.setIntUniform("texture1", 0);
 
-        // matrices unifroms
+        // matrices uniforms
         shader.setMat4("model",      model);
         shader.setMat4("view",       view);
         shader.setMat4("projection", proj);
         shader.setMat3("normalMatrix", normalMatrix);
 
-        // light uniforms
-        shader.setVec3Uniform("light.position", lightPos);
-        shader.setVec3Uniform("light.ambient",  glm::vec3(1.0f));
-        shader.setVec3Uniform("light.diffuse",  glm::vec3(0.8f));
-        shader.setVec3Uniform("light.specular", glm::vec3(1.0f));
+        // set the light uniforms
+        for (int i = 0; i < 5; i++) {
+            lights[i].setLightUniforms(shader, i);
+        }
 
-        // material unifroms
+        // material uniforms
         shader.setVec3Uniform("material.ambient",   glm::vec3(1.0f,1.0f, 1.0f));
         shader.setVec3Uniform("material.diffuse",   glm::vec3(1.0f, 1.0f, 1.f));
         shader.setVec3Uniform("material.specular",  glm::vec3(0.5f));
         shader.setFloatUniform("material.shininess", 32.0f);
 
         // camera position for specular
-        shader.setVec3Uniform("viewPosition", cameraPos); // The hardcode camera.
+        shader.setVec3Uniform("viewPosition", cameraPos); // The hardcoded camera.
 
-        renderer.draw();
+        // draw track
+        trackRenderer.draw();
 
+        // draw objects moving allong track.
+        float now   = glfwGetTime();
+        float delta = now - lastTime;
+        lastTime    = now;
+        distanceTravelled += kartSpeed * delta;
         glm::mat4 kartModel = track.getTransformAtDistance(distanceTravelled);
-        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 5.0f)); // move
-        kartModel = glm::rotate(kartModel, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        kartModel = glm::scale(kartModel, glm::vec3(0.8f));  
-        shader.setMat4("model",kartModel);
-        marioMesh.draw();
-        kartMesh.draw();
-        wheelsMesh.draw();
+        glm::mat3 kartNormalMatrix = glm::mat3(glm::transpose(glm::inverse(kartModel)));
 
+        shader.setMat3("normalMatrix", kartNormalMatrix);
+        mario.draw(shader,kartModel, view, proj);
+        lakituWithSign.draw(shader, kartModel, view, proj,lastTime * lakituSpeed);
+
+        // draw the light objects (AKA grandstars)
+        for (int i = 0; i < 5; i++) { // last, different shder.
+            lights[i].draw(model, view, proj);
+        }
 
         window.swapBuffers();
         window.pollEvents();

@@ -2,6 +2,7 @@
 
 #include "Mesh.h"
 #include <string>
+#include <memory>
 
 class ObjLoader {
 public:
@@ -9,4 +10,4 @@ public:
 
 };
 
-void loadTexture(const char* textureFilePath, unsigned int& texture);
+void loadTexture(const char* textureFilePath, unsigned int& texture, bool verticalFlip = false);
