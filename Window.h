@@ -4,20 +4,18 @@
 
 class Window {
 public:
-    Window(int width, int height, const char* name);
-    ~Window();
-    bool shouldClose();
-    void swapBuffers();
-    void pollEvents();
-
+  Window(int width, int height, const char *name);
+  ~Window();
+  bool shouldClose();
+  void swapBuffers();
+  void pollEvents();
 
 private:
-    void init();
-    void loop();
-    void close();
+  void init();
+  void loop();
+  void close();
 
-    int m_width, m_height;
-    const char* m_name;
-    GLFWwindow* m_window;
-
+  int m_width, m_height;
+  const char *m_name;
+  GLFWwindow *m_window;
 };
