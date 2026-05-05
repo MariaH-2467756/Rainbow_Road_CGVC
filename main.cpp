@@ -42,7 +42,7 @@ int main() {
   window.setupCallbacks(mouse_callback, scroll_callback);
 
   Track track(getCurves()); // Test track
-  track.build(0.8f);
+  track.build(1.6f);
   TrackRenderer trackRenderer;
   trackRenderer.upload(track, "assets/rainbow_road_texture.png");
 
@@ -80,8 +80,8 @@ int main() {
 
   // vars for moving calcs.
   float distanceTravelled = 0.0f;
-  float kartSpeed = 2.50f;
-  float lakituSpeed = 0.15f;
+  float kartSpeed = 15.0f;
+  float lakituSpeed = 0.5f;
   float lastTime = glfwGetTime();
 
   while (!window.shouldClose()) {
