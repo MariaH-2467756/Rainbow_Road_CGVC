@@ -5,7 +5,8 @@
 
 #define LAKITU_OBJ_PATH "assets/Lakitu/Lakitu.obj"
 #define LAKITU_TEXTURE_PATH "assets/Lakitu/jugem_tex.png"
-#define SIGN_TEXTURE_PATH "assets/green_screen.png"
+#define SIGN_TEXTURE_PATH                                                      \
+  "assets/mario_kart_meme.png" //"assets/green_screen.png"
 
 class LakituWithSign {
 public:

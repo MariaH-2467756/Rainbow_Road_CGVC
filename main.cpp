@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "Window.h"
 #include "includes/GLFW/glfw3.h"
+#include "includes/glad/glad.h"
 #include "track/TrackRenderer.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
@@ -13,8 +14,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-const unsigned int WINDOW_WIDTH = 1900;
-const unsigned int WINDOW_HEIGTH = 1000;
+#include "FrameBuffer.h"
+#include "ScreenQuad.h"
+
+const unsigned int WINDOW_WIDTH = 1200;
+const unsigned int WINDOW_HEIGTH = 800;
 const char *WINDOW_NAME = "Rainbow Road";
 
 // function prototypes
@@ -73,8 +77,12 @@ int main() {
   glm::mat3 normalMatrix =
       glm::mat3(glm::transpose(glm::inverse(model))); // Calc normal on CPU.
 
-  // light
-  glm::vec3 lightPos(2.0f, 4.0f, 2.0f); // Hardcoded light.
+  // framebuffer logic
+  FrameBuffer fbo = FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGTH);
+  FrameBuffer bloomFbo = FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGTH);
+  ScreenAllignedQuad saq = ScreenAllignedQuad();
+  Shader fboShader = Shader("shaders/post_processing_vertex_shader.glsl",
+                            "shaders/post_processing_fragment_shader.glsl");
 
   glEnable(GL_DEPTH_TEST);
 
@@ -95,6 +103,9 @@ int main() {
                                       static_cast<float>(WINDOW_WIDTH) /
                                           static_cast<float>(WINDOW_HEIGTH),
                                       0.1f, 1000.0f);
+
+    // teken alles in fbo.
+    fbo.bind();
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -136,6 +147,38 @@ int main() {
     for (int i = 0; i < 5; i++) { // last, different shder.
       lights[i].draw(model, view, proj);
     }
+
+    fbo.unbind();
+
+    bloomFbo.bind();
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for (int i = 0; i < 5; i++) {
+      lights[i].draw(model, view, proj);
+    }
+    bloomFbo.unbind();
+
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    fboShader.useProgram();
+
+    // Bind de textuur van het framebuffer
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo.GetTexture());
+    fboShader.setIntUniform("screenTexture", 0);
+    fboShader.setVec2Uniform(
+        "texelSize", glm::vec2((1.0f / WINDOW_WIDTH), (1.0f / WINDOW_HEIGTH)));
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, bloomFbo.GetTexture());
+    fboShader.setIntUniform("bloomTexture", 1);
+    fboShader.setIntUniform("effectMode", window.getPostPRoceesingState());
+
+    saq.Draw();
+
+    glEnable(GL_DEPTH_TEST);
 
     window.swapBuffers();
     window.pollEvents();

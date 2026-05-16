@@ -12,6 +12,19 @@ void ControlsHandler::processInput(float delta) {
   if (glfwGetKey(glfw_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(glfw_window, true);
 
+  // post - processing state.
+  if (glfwGetKey(glfw_window, GLFW_KEY_N) == GLFW_PRESS)
+    m_window.setPostProcessingState(0);
+
+  if (glfwGetKey(glfw_window, GLFW_KEY_G) == GLFW_PRESS)
+    m_window.setPostProcessingState(1);
+
+  if (glfwGetKey(glfw_window, GLFW_KEY_L) == GLFW_PRESS)
+    m_window.setPostProcessingState(2);
+
+  if (glfwGetKey(glfw_window, GLFW_KEY_B) == GLFW_PRESS)
+    m_window.setPostProcessingState(3);
+
   // camera controls
   if (glfwGetKey(glfw_window, GLFW_KEY_W) == GLFW_PRESS)
     m_camera.ProcessKeyboard(FORWARD, delta);

@@ -15,6 +15,9 @@ public:
   void setFloatUniform(const char *name, float value) {
     glUniform1f(glGetUniformLocation(m_id, name), value);
   }
+  void setVec2Uniform(const char *name, const glm::vec2 &value) {
+    glUniform3fv(glGetUniformLocation(m_id, name), 1, &value[0]);
+  }
   void setVec3Uniform(const char *name, const glm::vec3 &value) {
     glUniform3fv(glGetUniformLocation(m_id, name), 1, &value[0]);
   }

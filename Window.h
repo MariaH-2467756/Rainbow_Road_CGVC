@@ -13,12 +13,15 @@ public:
   void setupCallbacks(GLFWcursorposfun mouseCallback,
                       GLFWscrollfun scrollCallback);
 
+  void setPostProcessingState(int state) { m_postProcessingState = state; };
+  int getPostPRoceesingState() { return m_postProcessingState; };
+
 private:
   void init();
-  void loop();
   void close();
 
   int m_width, m_height;
   const char *m_name;
   GLFWwindow *m_window;
+  int m_postProcessingState;
 };
