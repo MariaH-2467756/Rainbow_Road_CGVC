@@ -14,7 +14,7 @@ public:
                       GLFWscrollfun scrollCallback);
 
   void setPostProcessingState(int state) { m_postProcessingState = state; };
-  int getPostPRoceesingState() { return m_postProcessingState; };
+  int getPostProcessingState() { return m_postProcessingState; };
 
 private:
   void init();

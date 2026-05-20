@@ -1,3 +1,4 @@
+#pragma once
 #include "includes/glad/glad.h"
 #include <iostream>
 
@@ -42,5 +43,6 @@ public:
 
   void unbind() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
-  unsigned int GetTexture() { return m_textureColorBuffer; }
+  unsigned int getTexture() { return m_textureColorBuffer; }
+  unsigned int getFBO() { return m_fbo; }
 };

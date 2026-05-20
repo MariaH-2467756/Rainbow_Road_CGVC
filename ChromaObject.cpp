@@ -2,6 +2,9 @@
 #include "ObjLoader.h"
 #include <glm/detail/qualifier.hpp>
 
+#define VERTEX_SHADER_PATH "shaders/chroma_vertex_shader.glsl"
+#define FRAGMENT_SHADER_PATH "shaders/chroma_fragment_shader.glsl"
+
 std::unique_ptr<Shader> ChromaObject::m_shader = nullptr;
 
 ChromaObject::ChromaObject(const char *textureFilePath) : m_VAO(0), m_VBO(0) {
@@ -12,8 +15,7 @@ ChromaObject::ChromaObject(const char *textureFilePath) : m_VAO(0), m_VBO(0) {
 ChromaObject::~ChromaObject() { cleanup(); }
 
 void ChromaObject::initShader() {
-  m_shader = std::make_unique<Shader>("shaders/chroma_vertex_shader.glsl",
-                                      "shaders/chroma_fragment_shader.glsl");
+  m_shader = std::make_unique<Shader>(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 }
 
 void ChromaObject::setMVP(const glm::mat4 &model, const glm::mat4 &view,

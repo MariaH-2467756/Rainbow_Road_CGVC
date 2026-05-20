@@ -1,6 +1,6 @@
 #version 330 core
 out vec4 fragmentColor;
-#define NUM_LIGHTS 5
+#define NUM_LIGHTS 16
 
 struct Material {
     vec3 ambient;

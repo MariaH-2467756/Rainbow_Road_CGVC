@@ -1,8 +1,7 @@
 #include "Window.h"
 
 Window::Window(int width, int height, const char *name)
-    : m_width(width), m_height(height), m_name(name),
-      m_post_processing_state(0) {
+    : m_width(width), m_height(height), m_name(name), m_postProcessingState(0) {
   init();
 }
 

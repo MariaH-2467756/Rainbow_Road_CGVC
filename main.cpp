@@ -14,8 +14,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "FrameBuffer.h"
-#include "ScreenQuad.h"
+#include "GaussianBlurEffect.h"
+#include "LaplacianEffect.h"
+
+#define NUM_LIGHTS 16
+#define LIGHTS                                                                        \
+  {                                                                                   \
+    {{-10.0f, 15.0f, 5.0f}}, {{20.0f, 12.0f, -5.0f}}, {{15.0f, 25.0f, 20.0f}},        \
+        {{0.0f, 18.0f, 25.0f}}, {{0.0f, 5.0f, 25.0f}},                                \
+        {{-15.0f, -25.0f, 0.0f}}, {{10.0f, -45.0f, 5.0f}},                            \
+        {{0.0f, -72.0f, -15.0f}}, {{35.0f, -20.0f, 35.0f}},                           \
+        {{0.0f, 20.0f, 55.0f}}, {{55.0f, 50.0f, -10.0f}},                             \
+        {{-55.0f, 45.0f, 25.0f}}, {{-45.0f, 20.0f, -20.0f}},                          \
+        {{30.0f, 35.0f, -50.0f}}, {{-25.0f, 10.0f, -30.0f}}, {{-20.0f, 10.0f, 15.0f}} \
+  }
 
 const unsigned int WINDOW_WIDTH = 1200;
 const unsigned int WINDOW_HEIGTH = 800;
@@ -59,17 +71,7 @@ int main() {
   LakituWithSign lakituWithSign = LakituWithSign();
 
   LightObject::initShader();
-  LightObject lights[5] = {
-      {glm::vec3(10.0f, 20.0f, 10.0f), glm::vec3(0.15f), glm::vec3(0.8f),
-       glm::vec3(1.0f)},
-      {glm::vec3(-50.0f, 30.0f, 0.0f), glm::vec3(0.15f),
-       glm::vec3(0.6f, 0.0f, 0.6f), glm::vec3(1.0f, 0.0f, 1.0f)},
-      {glm::vec3(0.0f, 50.0f, -100.0f), glm::vec3(0.15f),
-       glm::vec3(1.0f, 0.5f, 0.0f), glm::vec3(1.0f, 0.8f, 0.2f)},
-      {glm::vec3(100.0f, 15.0f, 50.0f), glm::vec3(0.15f),
-       glm::vec3(0.0f, 0.4f, 0.8f), glm::vec3(0.0f, 0.6f, 1.0f)},
-      {glm::vec3(-30.0f, 10.0f, 80.0f), glm::vec3(0.15f), glm::vec3(0.5f),
-       glm::vec3(0.5f)}};
+  LightObject lights[] = LIGHTS;
 
   // matrices
   glm::mat4 model = glm::mat4(1.0f);
@@ -80,16 +82,20 @@ int main() {
   // framebuffer logic
   FrameBuffer fbo = FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGTH);
   FrameBuffer bloomFbo = FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGTH);
+  ScreenAllignedQuad::initShader();
   ScreenAllignedQuad saq = ScreenAllignedQuad();
-  Shader fboShader = Shader("shaders/post_processing_vertex_shader.glsl",
-                            "shaders/post_processing_fragment_shader.glsl");
+
+  // make the effects
+  GaussianBlurEffect gaussianBlur =
+      GaussianBlurEffect(WINDOW_WIDTH, WINDOW_HEIGTH);
+  LaplacianEffect laplacian = LaplacianEffect(WINDOW_WIDTH, WINDOW_HEIGTH);
 
   glEnable(GL_DEPTH_TEST);
 
   // vars for moving calcs.
   float distanceTravelled = 0.0f;
   float kartSpeed = 15.0f;
-  float lakituSpeed = 0.5f;
+  float lakituSpeed = 2.5f;
   float lastTime = glfwGetTime();
 
   while (!window.shouldClose()) {
@@ -144,7 +150,7 @@ int main() {
     lakituWithSign.draw(shader, kartModel, view, proj, lastTime * lakituSpeed);
 
     // draw the light objects (AKA grandstars)
-    for (int i = 0; i < 5; i++) { // last, different shder.
+    for (int i = 0; i < NUM_LIGHTS; i++) { // last, different shder.
       lights[i].draw(model, view, proj);
     }
 
@@ -154,29 +160,51 @@ int main() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < NUM_LIGHTS; i++) {
       lights[i].draw(model, view, proj);
     }
     bloomFbo.unbind();
 
+    int mode = window.getPostProcessingState();
+    glDisable(GL_DEPTH_TEST);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
 
-    fboShader.useProgram();
+    GLuint finalTex;
+    GLuint bloomTex;
 
-    // Bind de textuur van het framebuffer
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fbo.GetTexture());
-    fboShader.setIntUniform("screenTexture", 0);
-    fboShader.setVec2Uniform(
-        "texelSize", glm::vec2((1.0f / WINDOW_WIDTH), (1.0f / WINDOW_HEIGTH)));
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, bloomFbo.GetTexture());
-    fboShader.setIntUniform("bloomTexture", 1);
-    fboShader.setIntUniform("effectMode", window.getPostPRoceesingState());
+    switch (mode) {
+    case 0:
+      finalTex = fbo.getTexture();
+      break;
 
-    saq.Draw();
+    case 1:
+      gaussianBlur.addEffect(fbo, saq);
+      finalTex = fbo.getTexture();
+      break;
+
+    case 2:
+      laplacian.addEffect(fbo, saq);
+      finalTex = fbo.getTexture();
+      break;
+
+    case 3:
+      gaussianBlur.addEffect(bloomFbo, saq);
+      finalTex = fbo.getTexture();
+      bloomTex = bloomFbo.getTexture();
+      break;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    saq.draw(finalTex);
+
+    if (mode == 3) {
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE, GL_ONE);
+      saq.draw(bloomTex);
+      glDisable(GL_BLEND);
+    }
 
     glEnable(GL_DEPTH_TEST);
 
