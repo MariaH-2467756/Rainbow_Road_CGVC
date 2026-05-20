@@ -37,6 +37,9 @@ public:
                             GLboolean constrainPitch = true);
   void ProcessMouseScroll(float yoffset);
 
+  void FollowTarget(const glm::mat4 &targetTransform, float distance = -0.1f,
+                    float height = 1.5f);
+
 private:
   // camera Attributes
   glm::vec3 m_position;
