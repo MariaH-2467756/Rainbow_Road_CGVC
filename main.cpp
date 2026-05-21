@@ -144,6 +144,10 @@ int main() {
     lastTime = now;
     distanceTravelled += kartSpeed * delta;
     glm::mat4 kartModel = track.getTransformAtDistance(distanceTravelled);
+
+    // pass kartmodel to controls for camera follow
+    controls->setKartTransform(kartModel);
+
     glm::mat3 kartNormalMatrix =
         glm::mat3(glm::transpose(glm::inverse(kartModel)));
 

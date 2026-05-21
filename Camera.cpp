@@ -81,6 +81,22 @@ void Camera::ProcessMouseScroll(float yoffset) {
     m_zoom = 45.0f;
 }
 
+void Camera::FollowTarget(const glm::mat4 &targetTransform, float distance,
+                          float height) {
+  // Extract kart position and forward direction from transform matrix
+  glm::vec3 kartPos = glm::vec3(targetTransform[3]);
+  glm::vec3 kartForward =
+      glm::normalize(glm::vec3(targetTransform[2])); // kart's local Z
+
+  m_position = kartPos - kartForward * distance + glm::vec3(0.0f, height, 0.0f);
+  m_front = -kartForward;
+
+  // Rebuild right and up so the rest of the camera still works
+  // cleanly
+  m_right = glm::normalize(glm::cross(m_front, m_world_up));
+  m_up = glm::normalize(glm::cross(m_right, m_front));
+}
+
 // calculates the front vector from the Camera's (updated) Euler Angles
 void Camera::updateCameraVectors() {
   // calculate the new Front vector
