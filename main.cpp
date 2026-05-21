@@ -97,7 +97,7 @@ int main() {
   // vars for moving calcs.
   float distanceTravelled = 0.0f;
   float kartSpeed = 15.0f;
-  float lakituSpeed = 2.5f;
+  float lakituSpeed = 1.0f;
   float lastTime = glfwGetTime();
 
   while (!window.shouldClose()) {

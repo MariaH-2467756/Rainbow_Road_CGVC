@@ -5,8 +5,7 @@
 
 #define LAKITU_OBJ_PATH "assets/Lakitu/Lakitu.obj"
 #define LAKITU_TEXTURE_PATH "assets/Lakitu/jugem_tex.png"
-#define SIGN_TEXTURE_PATH                                                      \
-  "assets/mario_kart_meme.png" //"assets/green_screen.png"
+#define SIGN_TEXTURE_PATH "assets/lakitu_greenscreen.png"
 
 class LakituWithSign {
 public:
@@ -21,7 +20,7 @@ public:
 
     glm::mat4 infintyModel = glm::translate(
         model,
-        glm::vec3(loopX, loopY,
+        glm::vec3(loopX, loopY + 1.0f,
                   -10.0f)); // moves in infitny sign.(might have to callibrate
                             // pos, but see when cameras are good.)
 

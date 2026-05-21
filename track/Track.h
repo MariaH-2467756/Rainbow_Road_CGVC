@@ -10,7 +10,7 @@ struct TrackVertex {
 class Track {
 public:
   Track(std::vector<BezierCurve> curves);
-  void addCurve(const BezierCurve &curve, int steps = 250);
+  void addCurve(const BezierCurve &curve, int steps = 500);
   void build(float width);
 
   std::vector<TrackVertex> vertices() const { return m_vertices; };
