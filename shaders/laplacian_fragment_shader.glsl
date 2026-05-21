@@ -3,7 +3,7 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
-uniform sampler2D screenTextureV
+uniform sampler2D screenTextureV;
 uniform int passIndex;
 
 const int HALF = 7;

@@ -14,6 +14,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "CrosshairEffect.h"
 #include "GaussianBlurEffect.h"
 #include "LaplacianEffect.h"
 
@@ -89,6 +90,7 @@ int main() {
   GaussianBlurEffect gaussianBlur =
       GaussianBlurEffect(WINDOW_WIDTH, WINDOW_HEIGTH);
   LaplacianEffect laplacian = LaplacianEffect(WINDOW_WIDTH, WINDOW_HEIGTH);
+  CrosshairEffect crosshair = CrosshairEffect(WINDOW_WIDTH, WINDOW_HEIGTH);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -175,25 +177,27 @@ int main() {
 
     switch (mode) {
     case 0:
-      finalTex = fbo.getTexture();
       break;
 
     case 1:
       gaussianBlur.addEffect(fbo, saq);
-      finalTex = fbo.getTexture();
       break;
 
     case 2:
       laplacian.addEffect(fbo, saq);
-      finalTex = fbo.getTexture();
       break;
 
     case 3:
       gaussianBlur.addEffect(bloomFbo, saq);
-      finalTex = fbo.getTexture();
       bloomTex = bloomFbo.getTexture();
       break;
     }
+
+    if (window.getCrosshair()) {
+      crosshair.addEffect(fbo, saq);
+    }
+
+    finalTex = fbo.getTexture();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

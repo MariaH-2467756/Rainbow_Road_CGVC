@@ -25,6 +25,9 @@ void ControlsHandler::processInput(float delta) {
   if (glfwGetKey(glfw_window, GLFW_KEY_B) == GLFW_PRESS)
     m_window.setPostProcessingState(3);
 
+  if (glfwGetKey(glfw_window, GLFW_KEY_C) == GLFW_PRESS)
+    m_window.toggleCrosshair();
+
   // camera controls
   if (glfwGetKey(glfw_window, GLFW_KEY_W) == GLFW_PRESS)
     m_camera.ProcessKeyboard(FORWARD, delta);

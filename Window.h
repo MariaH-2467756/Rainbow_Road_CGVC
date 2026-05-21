@@ -15,6 +15,8 @@ public:
 
   void setPostProcessingState(int state) { m_postProcessingState = state; };
   int getPostProcessingState() { return m_postProcessingState; };
+  void toggleCrosshair() { m_crosshair = not m_crosshair; };
+  bool getCrosshair() { return m_crosshair; }
 
 private:
   void init();
@@ -24,4 +26,5 @@ private:
   const char *m_name;
   GLFWwindow *m_window;
   int m_postProcessingState;
+  bool m_crosshair;
 };
