@@ -138,12 +138,6 @@ int main() {
       lights[i].setLightUniforms(shader, i);
     }
 
-    // material uniforms
-    shader.setVec3Uniform("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
-    shader.setVec3Uniform("material.diffuse", glm::vec3(1.0f, 1.0f, 1.f));
-    shader.setVec3Uniform("material.specular", glm::vec3(0.5f));
-    shader.setFloatUniform("material.shininess", 32.0f);
-
     // draw track
     trackRenderer.draw();
 
