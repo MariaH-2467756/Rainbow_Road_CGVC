@@ -42,3 +42,7 @@
 
 # vscode directory
 /.vscode
+
+# misc
+/build
+/main
