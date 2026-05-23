@@ -31,6 +31,13 @@ void ControlsHandler::processInput(float delta) {
     m_window.toggleCrosshair();
   m_c_wasPressed = cDown;
 
+  // r: reload all stars
+  bool rDown = glfwGetKey(glfw_window, GLFW_KEY_R) == GLFW_PRESS;
+  if (rDown && !m_r_wasPressed)
+    for (int i = 0; i < m_numLights; i++)
+      m_lights[i].setActive(true);
+  m_r_wasPressed = rDown;
+
   // on tab press: toggle followTarget
   bool tabDown = glfwGetKey(glfw_window, GLFW_KEY_TAB) == GLFW_PRESS;
   if (tabDown && !m_tab_WasPressed) {
@@ -99,3 +106,8 @@ void ControlsHandler::setKartTransform(const glm::mat4 &t) {
   m_kartTransform = t;
 }
 bool ControlsHandler::isFollowingKart() const { return m_followKart; }
+
+void ControlsHandler::setLights(LightObject *lights, int count) {
+  m_lights = lights;
+  m_numLights = count;
+}

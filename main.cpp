@@ -73,6 +73,7 @@ int main() {
 
   LightObject::initShader();
   LightObject lights[] = LIGHTS;
+  controls->setLights(lights, NUM_LIGHTS);
 
   // matrices
   glm::mat4 model = glm::mat4(1.0f);
