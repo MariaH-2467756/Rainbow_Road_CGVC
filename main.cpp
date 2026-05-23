@@ -170,12 +170,24 @@ int main() {
     fbo.unbind();
 
     bloomFbo.bind();
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // take the depth from fbo and put in in the bloomfbo.
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo.getFBO());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bloomFbo.getFBO());
+    glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGTH, 0, 0, WINDOW_WIDTH,
+                      WINDOW_HEIGTH, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, bloomFbo.getFBO());
+    glDepthFunc(GL_EQUAL);
+
+    // use depth test when drawing to bloomfbo
+    glEnable(GL_DEPTH_TEST);
     for (int i = 0; i < NUM_LIGHTS; i++) {
       lights[i].draw(model, view, proj);
     }
+
+    // reset the depth func.
+    glDepthFunc(GL_LESS);
     bloomFbo.unbind();
 
     int mode = window.getPostProcessingState();
