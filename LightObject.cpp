@@ -32,14 +32,11 @@ void LightObject::setLightUniforms(Shader &shader, int index) const {
   glm::vec3 zero(0.0f);
   shader.setVec3Uniform((base + "position").c_str(), m_light.m_position);
   shader.setVec3Uniform((base + "ambient").c_str(),
-                        m_is_active ? m_light.m_ambient * m_light.m_intensity
-                                    : zero);
+                        m_is_active ? m_light.m_ambient : zero);
   shader.setVec3Uniform((base + "diffuse").c_str(),
-                        m_is_active ? m_light.m_diffuse * m_light.m_intensity
-                                    : zero);
+                        m_is_active ? m_light.m_diffuse : zero);
   shader.setVec3Uniform((base + "specular").c_str(),
-                        m_is_active ? m_light.m_specular * m_light.m_intensity
-                                    : zero);
+                        m_is_active ? m_light.m_specular : zero);
 }
 
 void LightObject::setMVP(const glm::mat4 &model, const glm::mat4 &view,

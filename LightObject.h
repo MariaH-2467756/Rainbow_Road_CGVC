@@ -18,7 +18,7 @@ public:
             ObjLoader().load(GRAND_STAR_OBJ_PATH, GRAND_STAR_TEXTURE_PATH)) {};
 
   LightObject(glm::vec3 position) // with standard light presets
-      : m_light(position, glm::vec3(0.15f), glm::vec3(0.8f), glm::vec3(1.0f)),
+      : m_light(position, glm::vec3(0.03f), glm::vec3(0.15f), glm::vec3(0.2f)),
         m_light_object(
             ObjLoader().load(GRAND_STAR_OBJ_PATH, GRAND_STAR_TEXTURE_PATH)) {};
 
