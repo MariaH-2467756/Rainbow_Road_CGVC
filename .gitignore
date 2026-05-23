@@ -30,7 +30,6 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
@@ -46,3 +45,5 @@
 # misc
 /build
 /main
+/out
+/.vs

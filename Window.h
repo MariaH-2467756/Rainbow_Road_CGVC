@@ -17,7 +17,7 @@ public:
 
   void setPostProcessingState(int state) { m_postProcessingState = state; };
   int getPostProcessingState() { return m_postProcessingState; };
-  void toggleCrosshair() { m_crosshair = not m_crosshair; };
+  void toggleCrosshair() { m_crosshair = !m_crosshair; };
   bool getCrosshair() { return m_crosshair; }
   int getPickedLight(LightObject lights[], int count, const glm::mat4 &view,
                      const glm::mat4 &proj, float thresholdNDC = 0.08f);
