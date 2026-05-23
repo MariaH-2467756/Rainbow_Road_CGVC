@@ -192,6 +192,7 @@ int main() {
     GLuint finalTex;
     GLuint bloomTex;
 
+    // check what mode of post processing to use.
     switch (mode) {
     case 0:
       break;
@@ -218,9 +219,9 @@ int main() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    saq.draw(finalTex);
+    saq.draw(finalTex); // draw final texture
 
-    if (mode == 3) {
+    if (mode == 3) { // blend blurred lighta if mode 3
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE);
       saq.draw(bloomTex);
