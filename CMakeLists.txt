@@ -17,7 +17,7 @@ target_include_directories(RainbowRoad PRIVATE includes)
 # Linux
 if(UNIX AND NOT APPLE)
     target_link_libraries(RainbowRoad PRIVATE
-        ${CMAKE_SOURCE_DIR}/lib/libglfw3.a
+        glfw  #${CMAKE_SOURCE_DIR}/lib/libglfw3.a
         GL dl pthread
     )
 endif()
