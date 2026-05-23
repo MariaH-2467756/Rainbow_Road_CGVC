@@ -3,12 +3,13 @@
 class Light {
 public:
   Light(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse,
-        glm::vec3 specular)
+        glm::vec3 specular, float intensity = 0.18f)
       : m_position(position), m_ambient(ambient), m_diffuse(diffuse),
-        m_specular(specular) {};
+        m_specular(specular), m_intensity(intensity) {};
 
   glm::vec3 m_position;
   glm::vec3 m_ambient;
   glm::vec3 m_diffuse;
   glm::vec3 m_specular;
+  float m_intensity;
 };

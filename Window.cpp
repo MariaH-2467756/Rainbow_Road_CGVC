@@ -28,6 +28,31 @@ void Window::setupCallbacks(GLFWcursorposfun mouseCallback,
   glfwSetScrollCallback(m_window, scrollCallback);
 }
 
+int Window::getPickedLight(LightObject lights[], int count,
+                           const glm::mat4 &view, const glm::mat4 &proj,
+                           float thresholdNDC) {
+  int best = -1;
+  float bestDist = thresholdNDC;
+
+  for (int i = 0; i < count; i++) {
+    if (!lights[i].isActive())
+      continue;
+
+    glm::vec4 clip = proj * view * glm::vec4(lights[i].getPosition(), 1.0f);
+    if (clip.w <= 0.0f)
+      continue;
+
+    glm::vec2 ndc = glm::vec2(clip.x, clip.y) / clip.w;
+    float dist = glm::length(ndc);
+
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = i;
+    }
+  }
+  return best;
+}
+
 void Window::init() {
   if (!glfwInit()) {
     std::cerr << "Failed to initialize GLFW\n";

@@ -39,6 +39,7 @@ public:
 
   void FollowTarget(const glm::mat4 &targetTransform, float distance = -0.1f,
                     float height = 1.5f);
+  void SyncOrientationFromFront();
 
 private:
   // camera Attributes

@@ -1,5 +1,7 @@
 #pragma once
+#include "LightObject.h"
 #include "includes/GLFW/glfw3.h"
+#include <glm/glm.hpp>
 #include <iostream>
 
 class Window {
@@ -17,6 +19,8 @@ public:
   int getPostProcessingState() { return m_postProcessingState; };
   void toggleCrosshair() { m_crosshair = not m_crosshair; };
   bool getCrosshair() { return m_crosshair; }
+  int getPickedLight(LightObject lights[], int count, const glm::mat4 &view,
+                     const glm::mat4 &proj, float thresholdNDC = 0.08f);
 
 private:
   void init();

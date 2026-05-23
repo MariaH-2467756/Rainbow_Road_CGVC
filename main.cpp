@@ -112,6 +112,13 @@ int main() {
                                           static_cast<float>(WINDOW_HEIGTH),
                                       0.1f, 1000.0f);
 
+    // picking
+    if (controls->wasLeftClicked()) {
+      int picked = window.getPickedLight(lights, NUM_LIGHTS, view, proj);
+      if (picked != -1)
+        lights[picked].setActive(false);
+    }
+
     // teken alles in fbo.
     fbo.bind();
 
@@ -127,7 +134,7 @@ int main() {
     shader.setMat3("normalMatrix", normalMatrix);
 
     // set the light uniforms
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < NUM_LIGHTS; i++) {
       lights[i].setLightUniforms(shader, i);
     }
 

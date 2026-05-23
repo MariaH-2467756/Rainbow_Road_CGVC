@@ -1,3 +1,4 @@
+#pragma once
 #include "Light.h"
 #include "Mesh.h"
 #include "ObjLoader.h"
@@ -21,6 +22,10 @@ public:
         m_light_object(
             ObjLoader().load(GRAND_STAR_OBJ_PATH, GRAND_STAR_TEXTURE_PATH)) {};
 
+  glm::vec3 getPosition() const;
+  bool isActive() const;
+  void setActive(bool is_active);
+
   void draw(const glm::mat4 &model, const glm::mat4 &view,
             const glm::mat4 &projection);
   void setLightUniforms(Shader &shader, int index) const;
@@ -33,4 +38,5 @@ private:
   static std::unique_ptr<Shader> m_shader;
   Light m_light;
   Mesh m_light_object;
+  bool m_is_active = true;
 };

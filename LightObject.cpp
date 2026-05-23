@@ -12,19 +12,34 @@ void LightObject::initShader() {
 
 void LightObject::draw(const glm::mat4 &model, const glm::mat4 &view,
                        const glm::mat4 &projection) {
+
+  if (!m_is_active)
+    return;
+
   m_shader->useProgram();
-
   setMVP(model, view, projection);
-
   m_light_object.draw();
 }
 
+glm::vec3 LightObject::getPosition() const { return m_light.m_position; }
+
+bool LightObject::isActive() const { return m_is_active; }
+
+void LightObject::setActive(bool is_active) { m_is_active = is_active; }
+
 void LightObject::setLightUniforms(Shader &shader, int index) const {
-  std::string baseString = "lights[" + std::to_string(index) + "].";
-  shader.setVec3Uniform((baseString + "position").c_str(), m_light.m_position);
-  shader.setVec3Uniform((baseString + "ambient").c_str(), m_light.m_ambient);
-  shader.setVec3Uniform((baseString + "diffuse").c_str(), m_light.m_diffuse);
-  shader.setVec3Uniform((baseString + "specular").c_str(), m_light.m_specular);
+  std::string base = "lights[" + std::to_string(index) + "].";
+  glm::vec3 zero(0.0f);
+  shader.setVec3Uniform((base + "position").c_str(), m_light.m_position);
+  shader.setVec3Uniform((base + "ambient").c_str(),
+                        m_is_active ? m_light.m_ambient * m_light.m_intensity
+                                    : zero);
+  shader.setVec3Uniform((base + "diffuse").c_str(),
+                        m_is_active ? m_light.m_diffuse * m_light.m_intensity
+                                    : zero);
+  shader.setVec3Uniform((base + "specular").c_str(),
+                        m_is_active ? m_light.m_specular * m_light.m_intensity
+                                    : zero);
 }
 
 void LightObject::setMVP(const glm::mat4 &model, const glm::mat4 &view,

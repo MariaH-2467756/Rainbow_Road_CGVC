@@ -25,14 +25,22 @@ void ControlsHandler::processInput(float delta) {
   if (glfwGetKey(glfw_window, GLFW_KEY_B) == GLFW_PRESS)
     m_window.setPostProcessingState(3);
 
-  if (glfwGetKey(glfw_window, GLFW_KEY_C) == GLFW_PRESS)
+  // c: toggle crosshair
+  bool cDown = glfwGetKey(glfw_window, GLFW_KEY_C) == GLFW_PRESS;
+  if (cDown && !m_c_wasPressed)
     m_window.toggleCrosshair();
+  m_c_wasPressed = cDown;
 
-  // on tab press: toggle followTarger
+  // on tab press: toggle followTarget
   bool tabDown = glfwGetKey(glfw_window, GLFW_KEY_TAB) == GLFW_PRESS;
-  if (tabDown && !m_tabWasPressed)
+  if (tabDown && !m_tab_WasPressed) {
     m_followKart = !m_followKart;
-  m_tabWasPressed = tabDown;
+    if (!m_followKart) {
+      m_camera.SyncOrientationFromFront();
+      m_firstMouse = true;
+    }
+  }
+  m_tab_WasPressed = tabDown;
 
   // camera controls
   if (!m_followKart) {
@@ -51,6 +59,14 @@ void ControlsHandler::processInput(float delta) {
   } else {
     m_camera.FollowTarget(m_kartTransform);
   }
+}
+
+bool ControlsHandler::wasLeftClicked() {
+  bool leftDown = glfwGetMouseButton(m_window.getGLFWwindow(),
+                                     GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+  bool clicked = leftDown && !m_lmb_WasPressed;
+  m_lmb_WasPressed = leftDown;
+  return clicked;
 }
 
 // mouse movement controls
