@@ -7,6 +7,12 @@ We hebben dit geïmplementeerd door een track te maken van bezier curves en hier
 
 ## Controls
 
+### Window
+
+| Key | Actie |
+|-----|-------|
+| `esc` | window sluiten |
+
 ### Camera
 
 | Key | Actie |
